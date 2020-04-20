@@ -3,13 +3,14 @@ syntax = "proto3";
 package face_detector;
 
 service FaceDetector {
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc DetectFaces (Request) returns (Reply) {}
 }
 
-message HelloRequest {
-  string name = 1;
+message Request {
+  bytes image = 1;
+  string filename = 2;
 }
 
-message HelloReply {
-  string message = 1;
+message Reply {
+	repeated int32 detected_faces = 1;
 }
