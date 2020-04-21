@@ -18,22 +18,29 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='face_detector',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\rservice.proto\x12\rface_detector\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1d\n\nHelloReply\x12\x0f\n\x07message\x18\x01 \x01(\t2T\n\x0c\x46\x61\x63\x65\x44\x65tector\x12\x44\n\x08SayHello\x12\x1b.face_detector.HelloRequest\x1a\x19.face_detector.HelloReply\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\rservice.proto\x12\rface_detector\"*\n\x07Request\x12\r\n\x05image\x18\x01 \x01(\x0c\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\"\x1f\n\x05Reply\x12\x16\n\x0e\x64\x65tected_faces\x18\x01 \x03(\x05\x32M\n\x0c\x46\x61\x63\x65\x44\x65tector\x12=\n\x0b\x44\x65tectFaces\x12\x16.face_detector.Request\x1a\x14.face_detector.Reply\"\x00\x62\x06proto3'
 )
 
 
 
 
-_HELLOREQUEST = _descriptor.Descriptor(
-  name='HelloRequest',
-  full_name='face_detector.HelloRequest',
+_REQUEST = _descriptor.Descriptor(
+  name='Request',
+  full_name='face_detector.Request',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='face_detector.HelloRequest.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      name='image', full_name='face_detector.Request.image', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='filename', full_name='face_detector.Request.filename', index=1,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -51,21 +58,21 @@ _HELLOREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=32,
-  serialized_end=60,
+  serialized_end=74,
 )
 
 
-_HELLOREPLY = _descriptor.Descriptor(
-  name='HelloReply',
-  full_name='face_detector.HelloReply',
+_REPLY = _descriptor.Descriptor(
+  name='Reply',
+  full_name='face_detector.Reply',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='message', full_name='face_detector.HelloReply.message', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      name='detected_faces', full_name='face_detector.Reply.detected_faces', index=0,
+      number=1, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -81,27 +88,27 @@ _HELLOREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=62,
-  serialized_end=91,
+  serialized_start=76,
+  serialized_end=107,
 )
 
-DESCRIPTOR.message_types_by_name['HelloRequest'] = _HELLOREQUEST
-DESCRIPTOR.message_types_by_name['HelloReply'] = _HELLOREPLY
+DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
+DESCRIPTOR.message_types_by_name['Reply'] = _REPLY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-HelloRequest = _reflection.GeneratedProtocolMessageType('HelloRequest', (_message.Message,), {
-  'DESCRIPTOR' : _HELLOREQUEST,
+Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), {
+  'DESCRIPTOR' : _REQUEST,
   '__module__' : 'service_pb2'
-  # @@protoc_insertion_point(class_scope:face_detector.HelloRequest)
+  # @@protoc_insertion_point(class_scope:face_detector.Request)
   })
-_sym_db.RegisterMessage(HelloRequest)
+_sym_db.RegisterMessage(Request)
 
-HelloReply = _reflection.GeneratedProtocolMessageType('HelloReply', (_message.Message,), {
-  'DESCRIPTOR' : _HELLOREPLY,
+Reply = _reflection.GeneratedProtocolMessageType('Reply', (_message.Message,), {
+  'DESCRIPTOR' : _REPLY,
   '__module__' : 'service_pb2'
-  # @@protoc_insertion_point(class_scope:face_detector.HelloReply)
+  # @@protoc_insertion_point(class_scope:face_detector.Reply)
   })
-_sym_db.RegisterMessage(HelloReply)
+_sym_db.RegisterMessage(Reply)
 
 
 
@@ -111,16 +118,16 @@ _FACEDETECTOR = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=93,
-  serialized_end=177,
+  serialized_start=109,
+  serialized_end=186,
   methods=[
   _descriptor.MethodDescriptor(
-    name='SayHello',
-    full_name='face_detector.FaceDetector.SayHello',
+    name='DetectFaces',
+    full_name='face_detector.FaceDetector.DetectFaces',
     index=0,
     containing_service=None,
-    input_type=_HELLOREQUEST,
-    output_type=_HELLOREPLY,
+    input_type=_REQUEST,
+    output_type=_REPLY,
     serialized_options=None,
   ),
 ])

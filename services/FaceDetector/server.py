@@ -11,8 +11,7 @@ import service_pb2
 import service_pb2_grpc
 
 
-class Greeter(service_pb2_grpc.FaceDetector):
-
+# class Greeter(service_pb2_grpc.FaceDetector):
 	# def SayHello(self, request, context):
 	# 	return service_pb2.HelloReply(message='Hello, %s!' % request.name)
 
@@ -78,9 +77,10 @@ class Server():
 		self._server.add_insecure_port('[::]:50051')
 
 	def run(self):
-		self.server.start()
-		self.server.wait_for_termination()
-
+		self._server.start()
+		print("Started server")
+		self._server.wait_for_termination()
+		print("Closed server")
 
 if __name__ == '__main__':
 	logging.basicConfig()

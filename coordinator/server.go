@@ -1,45 +1,57 @@
 package main
 
 import (
-	"fmt"
-	"image/color"
+	"context"
+	"io/ioutil"
 	"log"
+	"os"
+	"time"
 
-	"gocv.io/x/gocv"
+	pb "github.com/DACUS1995/FaceRecognition/Coordinator/face_detector"
+
+	"google.golang.org/grpc"
 )
 
-func main() {
-	webcam, err := gocv.VideoCaptureDevice(0)
+const (
+	address   = "localhost:50051"
+	imagePath = "./test_images/faces.jpg"
+)
+
+func createFaceDetectorGRPCChannel() {
+
+}
+
+func testFaceDetector() {
+	// Set up a connection to the server.
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
-		log.Fatalf("error opening web cam: %v", err)
+		log.Fatalf("Did not connect: %v", err)
 	}
-	defer webcam.Close()
+	defer conn.Close()
+	client := pb.NewFaceDetectorClient(conn)
 
-	img := gocv.NewMat()
-	defer img.Close()
-
-	window := gocv.NewWindow("webcamwindow")
-	defer window.Close()
-
-	harrcascade := "opencv_haarcascade_frontalface_default.xml"
-	classifier := gocv.NewCascadeClassifier()
-	classifier.Load(harrcascade)
-	defer classifier.Close()
-
-	color := color.RGBA{0, 255, 0, 0}
-	for {
-		if ok := webcam.Read(&img); !ok || img.Empty() {
-			log.Println("Unable to read from the device")
-			continue
-		}
-
-		rects := classifier.DetectMultiScale(img)
-		for _, r := range rects {
-			fmt.Println("detected", r)
-			gocv.Rectangle(&img, r, color, 3)
-		}
-
-		window.IMShow(img)
-		window.WaitKey(50)
+	// Contact the server and print out its response.
+	path := imagePath
+	if len(os.Args) > 1 {
+		path = os.Args[1]
 	}
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatalf("Failed to open file: %v", path)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	defer cancel()
+
+	r, err := client.DetectFaces(ctx, &pb.Request{Image: data, Filename: "picture.jpg"})
+	if err != nil {
+		log.Fatalf("Could not Detect: %v", err)
+	}
+	log.Printf("Response: %v", r.GetDetectedFaces())
+}
+
+func main() {
+	testFaceDetector()
 }

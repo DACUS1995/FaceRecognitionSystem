@@ -13,17 +13,17 @@ class FaceDetectorStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SayHello = channel.unary_unary(
-                '/face_detector.FaceDetector/SayHello',
-                request_serializer=service__pb2.HelloRequest.SerializeToString,
-                response_deserializer=service__pb2.HelloReply.FromString,
+        self.DetectFaces = channel.unary_unary(
+                '/face_detector.FaceDetector/DetectFaces',
+                request_serializer=service__pb2.Request.SerializeToString,
+                response_deserializer=service__pb2.Reply.FromString,
                 )
 
 
 class FaceDetectorServicer(object):
     """Missing associated documentation comment in .proto file"""
 
-    def SayHello(self, request, context):
+    def DetectFaces(self, request, context):
         """Missing associated documentation comment in .proto file"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -32,10 +32,10 @@ class FaceDetectorServicer(object):
 
 def add_FaceDetectorServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SayHello': grpc.unary_unary_rpc_method_handler(
-                    servicer.SayHello,
-                    request_deserializer=service__pb2.HelloRequest.FromString,
-                    response_serializer=service__pb2.HelloReply.SerializeToString,
+            'DetectFaces': grpc.unary_unary_rpc_method_handler(
+                    servicer.DetectFaces,
+                    request_deserializer=service__pb2.Request.FromString,
+                    response_serializer=service__pb2.Reply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -48,7 +48,7 @@ class FaceDetector(object):
     """Missing associated documentation comment in .proto file"""
 
     @staticmethod
-    def SayHello(request,
+    def DetectFaces(request,
             target,
             options=(),
             channel_credentials=None,
@@ -57,8 +57,8 @@ class FaceDetector(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/face_detector.FaceDetector/SayHello',
-            service__pb2.HelloRequest.SerializeToString,
-            service__pb2.HelloReply.FromString,
+        return grpc.experimental.unary_unary(request, target, '/face_detector.FaceDetector/DetectFaces',
+            service__pb2.Request.SerializeToString,
+            service__pb2.Reply.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
