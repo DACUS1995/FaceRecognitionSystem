@@ -73,7 +73,7 @@ class Detector(service_pb2_grpc.FaceDetector):
 class Server():
 	def __init__(self):
 		self._server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-		service_pb2_grpc.add_FaceDetectorServicer_to_server(Detector, self._server)
+		service_pb2_grpc.add_FaceDetectorServicer_to_server(Detector(), self._server)
 		self._server.add_insecure_port('[::]:50051')
 
 	def run(self):
