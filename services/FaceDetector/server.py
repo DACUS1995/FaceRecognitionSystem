@@ -5,7 +5,9 @@ import os
 import dlib
 import glob
 import grpc
+import io
 import numpy as np
+from PIL import Image
 
 import service_pb2
 import service_pb2_grpc
@@ -25,17 +27,20 @@ class Detector(service_pb2_grpc.FaceDetector):
 		image_shape = [349, 620, 3]
 
 		image = request.image
-		image = np.ndarray.tobytes(image)
-		image = np.frombuffer(image, dtype=np.uint8)
-		image = np.reshape(images, image_shape)
+		# image = np.ndarray.tobytes(image)
+		# image = np.frombuffer(image, dtype=np.uint8)
+
+		image = np.array(Image.open(io.BytesIO(image)))
+		image = np.reshape(image, image_shape)
 
 		detected_faces = self._detect_face(image)
 		return service_pb2.Reply(detected_faces=detected_faces)
 
-	def _detect_face(image):
+	def _detect_face(self, image):
 		detector = dlib.get_frontal_face_detector()
 		sp = dlib.shape_predictor("./trained_models/shape_predictor.dat")
 		facerec = dlib.face_recognition_model_v1("./trained_models/face_recognition.dat")
+		win = dlib.image_window()
 			
 		win.clear_overlay()
 		win.set_image(image)
@@ -46,9 +51,14 @@ class Detector(service_pb2_grpc.FaceDetector):
 		dets = detector(image, 1)
 		print("Number of faces detected: {}".format(len(dets)))
 
+		detected_faces_boxes = []
 
 		# Now process each face we found.
 		for k, d in enumerate(dets):
+			detected_faces_boxes.append(d.left())
+			detected_faces_boxes.append(d.top())
+			detected_faces_boxes.append(d.right())
+			detected_faces_boxes.append(d.bottom())
 			print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(k, d.left(), d.top(), d.right(), d.bottom()))
 
 			# Get the landmarks/parts for the face in box d.
@@ -67,7 +77,7 @@ class Detector(service_pb2_grpc.FaceDetector):
 
 			dlib.hit_enter_to_continue()
 
-		return dets
+		return detected_faces_boxes
 
 
 class Server():
