@@ -1,4 +1,4 @@
-module github.com/DACUS1995/FaceRecognition/Coordinator
+module github.com/DACUS1995/FaceRecognition/coordinator
 
 go 1.13
 

@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	pb "github.com/DACUS1995/FaceRecognition/Coordinator/face_detector"
+	pb "github.com/DACUS1995/FaceRecognition/coordinator/face_detector"
 
 	"google.golang.org/grpc"
 )
