@@ -8,7 +8,7 @@ import (
 
 const (
 	address   = "localhost:50051"
-	imagePath = "./test_images/faces.jpg"
+	imagePath = "../test_images/faces.jpg"
 )
 
 func TestFaceDetector(t *testing.T) {
