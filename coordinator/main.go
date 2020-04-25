@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	facedetector "github.com/DACUS1995/FaceRecognition/coordinator/face_detector"
 	sampler "github.com/DACUS1995/FaceRecognition/coordinator/sampler"
@@ -13,15 +14,31 @@ const (
 	imagePath = "./test_images/faces.jpg"
 )
 
+var quit = make(chan bool)
+
 var imageShape = []int32{349, 620, 3}
 
 func main() {
 	RunLocalImageFaceDetection(imagePath)
-	RunPeriodicDetection()
+
+	go RunPeriodicDetection(5000, quit)
 }
 
-func RunPeriodicDetection() {
+func gracefulExit() {
+	quit <- true
+}
 
+func RunPeriodicDetection(miliseconds int, quit chan bool) {
+	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
+
+	for {
+		select {
+		case <-quit:
+			return
+		case t := <-ticker.C:
+			fmt.Println("Tick at", t)
+		}
+	}
 }
 
 func RunLocalImageFaceDetection(imagePath string) {
