@@ -30,16 +30,16 @@ func NewClient(address string) (*Client, error) {
 	}, nil
 }
 
-func (client *Client) DetectFaces(image []byte, fileName string) ([]int32, error) {
+func (client *Client) DetectFaces(image []byte, imageShape []int32) ([]int32, []float32, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	response, err := client.grpcClient.DetectFaces(ctx, &Request{Image: image, Filename: fileName})
+	response, err := client.grpcClient.DetectFaces(ctx, &Request{Image: image, ImageShape: imageShape})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return response.GetDetectedFaces(), err
+	return response.GetDetectedFacesBoxes(), response.GetDetectedFacesEmbeddings(), nil
 }
 
 func (client *Client) Close() {

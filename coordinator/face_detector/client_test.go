@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	address   = "localhost:50051"
-	imagePath = "../test_images/faces.jpg"
+	address    = "localhost:50051"
+	imagePath  = "../test_images/faces.jpg"
+	imageShape = []int32{349, 620, 3}
 )
 
 func TestFaceDetector(t *testing.T) {
@@ -26,7 +27,7 @@ func TestFaceDetector(t *testing.T) {
 	}
 
 	expected := []int32{381, 50, 424, 94, 118, 67, 170, 118, 469, 84, 521, 136, 245, 32, 296, 84}
-	response, err := client.DetectFaces(data, "picture.jpg")
+	response, err := client.DetectFaces(data, imageShape)
 
 	if len(response) != len(expected) {
 		t.Errorf("Expected: [%v] | Returned: [%v]", expected, response)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	facedetector "github.com/DACUS1995/FaceRecognition/coordinator/face_detector"
 	sampler "github.com/DACUS1995/FaceRecognition/coordinator/sampler"
@@ -11,6 +12,8 @@ const (
 	address   = "localhost:50051"
 	imagePath = "./test_images/faces.jpg"
 )
+
+var imageShape = []int32{349, 620, 3}
 
 func main() {
 	RunLocalImageFaceDetection(imagePath)
@@ -33,6 +36,10 @@ func RunLocalImageFaceDetection(imagePath string) {
 		panic("Failed to sample the test image")
 	}
 
-	response, err := client.DetectFaces(data, "picture.jpg")
-	fmt.Printf("Number of faces detected: %v", len(response)/4)
+	_, detectedFacesEmbeddings, err := client.DetectFaces(data, imageShape)
+	if err != nil {
+		log.Fatalf("Error: %v", err)
+	}
+
+	fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/125)
 }

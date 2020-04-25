@@ -18,7 +18,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='face_detector',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=b'\n\rservice.proto\x12\rface_detector\"*\n\x07Request\x12\r\n\x05image\x18\x01 \x01(\x0c\x12\x10\n\x08\x66ilename\x18\x02 \x01(\t\"\x1f\n\x05Reply\x12\x16\n\x0e\x64\x65tected_faces\x18\x01 \x03(\x05\x32M\n\x0c\x46\x61\x63\x65\x44\x65tector\x12=\n\x0b\x44\x65tectFaces\x12\x16.face_detector.Request\x1a\x14.face_detector.Reply\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\rservice.proto\x12\rface_detector\"-\n\x07Request\x12\r\n\x05image\x18\x01 \x01(\x0c\x12\x13\n\x0bimage_shape\x18\x02 \x03(\x05\"H\n\x05Reply\x12\x1c\n\x14\x64\x65tected_faces_boxes\x18\x01 \x03(\x05\x12!\n\x19\x64\x65tected_faces_embeddings\x18\x02 \x03(\x02\x32M\n\x0c\x46\x61\x63\x65\x44\x65tector\x12=\n\x0b\x44\x65tectFaces\x12\x16.face_detector.Request\x1a\x14.face_detector.Reply\"\x00\x62\x06proto3'
 )
 
 
@@ -39,39 +39,8 @@ _REQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='filename', full_name='face_detector.Request.filename', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=32,
-  serialized_end=74,
-)
-
-
-_REPLY = _descriptor.Descriptor(
-  name='Reply',
-  full_name='face_detector.Reply',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='detected_faces', full_name='face_detector.Reply.detected_faces', index=0,
-      number=1, type=5, cpp_type=1, label=3,
+      name='image_shape', full_name='face_detector.Request.image_shape', index=1,
+      number=2, type=5, cpp_type=1, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -88,8 +57,46 @@ _REPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=76,
-  serialized_end=107,
+  serialized_start=32,
+  serialized_end=77,
+)
+
+
+_REPLY = _descriptor.Descriptor(
+  name='Reply',
+  full_name='face_detector.Reply',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='detected_faces_boxes', full_name='face_detector.Reply.detected_faces_boxes', index=0,
+      number=1, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='detected_faces_embeddings', full_name='face_detector.Reply.detected_faces_embeddings', index=1,
+      number=2, type=2, cpp_type=6, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=79,
+  serialized_end=151,
 )
 
 DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
@@ -118,8 +125,8 @@ _FACEDETECTOR = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=109,
-  serialized_end=186,
+  serialized_start=153,
+  serialized_end=230,
   methods=[
   _descriptor.MethodDescriptor(
     name='DetectFaces',

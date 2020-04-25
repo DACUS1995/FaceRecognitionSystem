@@ -8,9 +8,10 @@ service FaceDetector {
 
 message Request {
   bytes image = 1;
-  string filename = 2;
+  repeated int32 image_shape = 2;
 }
 
 message Reply {
-	repeated int32 detected_faces = 1;
+	repeated int32 detected_faces_boxes = 1;
+	repeated float detected_faces_embeddings = 2;
 }
