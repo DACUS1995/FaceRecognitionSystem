@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	facedetector "github.com/DACUS1995/FaceRecognition/coordinator/face_detector"
@@ -15,6 +16,7 @@ const (
 )
 
 var quit = make(chan bool)
+var wg = sync.WaitGroup{}
 
 var imageShape = []int32{349, 620, 3}
 
@@ -22,6 +24,8 @@ func main() {
 	RunLocalImageFaceDetection(imagePath)
 
 	go RunPeriodicDetection(5000, quit)
+
+	<-quit
 }
 
 func gracefulExit() {
