@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	facedetector "github.com/DACUS1995/FaceRecognition/coordinator/face_detector"
-	sampler "github.com/DACUS1995/FaceRecognition/coordinator/sampler"
+	facedetector "github.com/DACUS1995/FaceRecognition/core/face_detector"
+	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
 
 const (
