@@ -9,15 +9,15 @@ type Sampler interface {
 	Sample() ([]byte, error)
 }
 
-type oneTimeSampler struct {
+type localSampler struct {
 	imagePath string
 }
 
-func NewOneTimeSampler(imagePath string) Sampler {
-	return &oneTimeSampler{imagePath}
+func NewLocalSampler(imagePath string) Sampler {
+	return &localSampler{imagePath}
 }
 
-func (sampler *oneTimeSampler) Sample() ([]byte, error) {
+func (sampler *localSampler) Sample() ([]byte, error) {
 	data, err := ioutil.ReadFile(sampler.imagePath)
 	if err != nil {
 		log.Fatalf("Failed to open file: %v", sampler.imagePath)
@@ -25,4 +25,16 @@ func (sampler *oneTimeSampler) Sample() ([]byte, error) {
 	}
 
 	return data, err
+}
+
+type cameraSampler struct {
+}
+
+func NewCameraSampler() Sampler {
+	return &cameraSampler{}
+}
+
+func (sampler *cameraSampler) Sample() ([]byte, error) {
+	panic("Must be implemented")
+	// return nil, nil
 }

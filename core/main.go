@@ -15,7 +15,7 @@ const (
 	imagePath = "./test_images/faces.jpg"
 )
 
-var quit = make(chan bool)
+var close = make(chan bool)
 var wg = sync.WaitGroup{}
 
 var imageShape = []int32{349, 620, 3}
@@ -23,24 +23,39 @@ var imageShape = []int32{349, 620, 3}
 func main() {
 	RunLocalImageFaceDetection(imagePath)
 
-	go RunPeriodicDetection(5000, quit)
+	go RunPeriodicDetection(5000, close)
 
-	<-quit
+	<-close
 }
 
 func gracefulExit() {
-	quit <- true
+	close <- true
 }
 
-func RunPeriodicDetection(miliseconds int, quit chan bool) {
+func RunPeriodicDetection(miliseconds int, close chan bool) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
+	client, err := facedetector.NewClient(address)
+	if err != nil {
+		panic("Failed to instantiate client.")
+	}
+	sampler := sampler.NewCameraSampler()
 
 	for {
 		select {
-		case <-quit:
+		case <-close:
 			return
-		case t := <-ticker.C:
-			fmt.Println("Tick at", t)
+		case <-ticker.C:
+			data, err := sampler.Sample()
+			if err != nil {
+				panic("Failed to sample the test image")
+			}
+
+			_, detectedFacesEmbeddings, err := client.DetectFaces(data, imageShape)
+			if err != nil {
+				log.Fatalf("Error: %v", err)
+			}
+
+			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/125)
 		}
 	}
 }
@@ -50,7 +65,7 @@ func RunLocalImageFaceDetection(imagePath string) {
 	if err != nil {
 		panic("Failed to instantiate client.")
 	}
-	sampler := sampler.NewOneTimeSampler(imagePath)
+	sampler := sampler.NewLocalSampler(imagePath)
 	data, err := sampler.Sample()
 
 	if err != nil {
