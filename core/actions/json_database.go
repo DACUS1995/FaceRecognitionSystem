@@ -7,11 +7,8 @@ import (
 	"os"
 )
 
-// TODO make database a singleton
-
 type DatabaseClient interface {
 	AddRecord(name string, embedding []float32)
-	SearchRecordByName()
 	SearchRecordBySimilarity()
 	GetAll() []DatabaseRecord
 	Save()
@@ -33,10 +30,15 @@ type JSONDatabaseClient struct {
 	database *JSONDatabase
 }
 
-func NewJSONDatabaseClient(path string) DatabaseClient {
-	return &JSONDatabaseClient{
-		&JSONDatabase{path, 0, []DatabaseRecord{}},
+var databasePath string = "./"
+var database *JSONDatabase = nil
+
+func NewJSONDatabaseClient() DatabaseClient {
+	if database == nil {
+		database = &JSONDatabase{databasePath, 0, []DatabaseRecord{}}
 	}
+
+	return &JSONDatabaseClient{database}
 }
 
 func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) {
@@ -58,7 +60,6 @@ func (client *JSONDatabaseClient) Save() {
 	client.database.saveDatabase()
 }
 
-func (client *JSONDatabaseClient) SearchRecordByName()       {}
 func (client *JSONDatabaseClient) SearchRecordBySimilarity() {}
 
 func (database *JSONDatabase) loadDatabase() {

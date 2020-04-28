@@ -5,7 +5,7 @@ import (
 )
 
 func TestJSONDatabase(t *testing.T) {
-	databaseClient := NewJSONDatabaseClient("./")
+	databaseClient := NewJSONDatabaseClient()
 	databaseClient.AddRecord("Tudor", []float32{0.1, 0.2})
 
 	databaseClient.Save()
