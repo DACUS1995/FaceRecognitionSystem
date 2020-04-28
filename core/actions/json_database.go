@@ -2,14 +2,16 @@ package actions
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 )
 
 type DatabaseClient interface {
 	AddRecord(name string, embedding []float32)
-	SearchRecordBySimilarity()
+	SearchRecordBySimilarity(faceEmbedding []float32) []DatabaseRecord
 	GetAll() []DatabaseRecord
 	Save()
 }
@@ -60,7 +62,19 @@ func (client *JSONDatabaseClient) Save() {
 	client.database.saveDatabase()
 }
 
-func (client *JSONDatabaseClient) SearchRecordBySimilarity() {}
+func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) []DatabaseRecord {
+	result := []DatabaseRecord{}
+
+	for _, record := range client.database.recordCollection {
+		distance, _ := cosineDistance(faceEmbedding, record.Embedding)
+
+		if distance > 0.8 {
+			result = append(result, record)
+		}
+	}
+
+	return result
+}
 
 func (database *JSONDatabase) loadDatabase() {
 	jsonFile, err := os.Open(database.savePath + "database.json")
@@ -78,4 +92,23 @@ func (database *JSONDatabase) saveDatabase() {
 	jsonContent, _ := json.Marshal(database.recordCollection)
 
 	ioutil.WriteFile(database.savePath+"database.json", jsonContent, 0644)
+}
+
+func cosineDistance(vecA []float32, vecB []float32) (float32, error) {
+	if len(vecA) != len(vecB) {
+		return 0, errors.New("The vectors don't have the same length.")
+	}
+
+	var dotProductSum float32 = 0
+	var magnitudeSumA float32 = 0
+	var magnitudeSumB float32 = 0
+
+	for idx := 0; idx < len(vecA); idx++ {
+		dotProductSum += vecA[idx] * vecB[idx]
+		magnitudeSumA += vecA[idx] * vecA[idx]
+		magnitudeSumB += vecB[idx] * vecB[idx]
+	}
+
+	distance := float64(dotProductSum) / (math.Sqrt(float64(magnitudeSumA)) * math.Sqrt(float64(magnitudeSumB)))
+	return float32(distance), nil
 }
