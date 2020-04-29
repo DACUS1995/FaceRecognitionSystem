@@ -9,23 +9,10 @@ import (
 	"os"
 )
 
-type DatabaseClient interface {
-	AddRecord(name string, embedding []float32)
-	SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32)
-	GetAll() []DatabaseRecord
-	Save()
-}
-
 type JSONDatabase struct {
 	savePath         string
 	numberOfRecords  int
 	recordCollection []DatabaseRecord
-}
-
-type DatabaseRecord struct {
-	ID        int
-	Name      string
-	Embedding []float32
 }
 
 type JSONDatabaseClient struct {
