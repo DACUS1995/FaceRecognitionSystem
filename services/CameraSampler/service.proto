@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+package camera_sampler;
+
+service CameraSampler {
+  rpc SampleImage (google.protobuf.Empty) returns (Reply) {}
+}
+
+message Reply {
+	bytes image = 1;
+	repeated int32 image_shape = 2;
+}
