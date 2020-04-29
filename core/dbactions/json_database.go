@@ -1,4 +1,4 @@
-package actions
+package dbactions
 
 import (
 	"encoding/json"
@@ -11,7 +11,7 @@ import (
 
 type DatabaseClient interface {
 	AddRecord(name string, embedding []float32)
-	SearchRecordBySimilarity(faceEmbedding []float32) []DatabaseRecord
+	SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32)
 	GetAll() []DatabaseRecord
 	Save()
 }
@@ -44,6 +44,14 @@ func NewJSONDatabaseClient() DatabaseClient {
 }
 
 func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) {
+	for _, record := range client.database.recordCollection {
+		if record.Name == name {
+			record.Embedding = embedding
+		}
+
+		return
+	}
+
 	client.database.recordCollection = append(
 		client.database.recordCollection,
 		DatabaseRecord{
@@ -62,18 +70,20 @@ func (client *JSONDatabaseClient) Save() {
 	client.database.saveDatabase()
 }
 
-func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) []DatabaseRecord {
+func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32) {
 	result := []DatabaseRecord{}
+	similarities := []float32{}
 
 	for _, record := range client.database.recordCollection {
 		distance, _ := cosineDistance(faceEmbedding, record.Embedding)
 
 		if distance > 0.8 {
 			result = append(result, record)
+			similarities = append(similarities, distance)
 		}
 	}
 
-	return result
+	return result, similarities
 }
 
 func (database *JSONDatabase) loadDatabase() {
