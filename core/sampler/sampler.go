@@ -26,15 +26,3 @@ func (sampler *localSampler) Sample() ([]byte, error) {
 
 	return data, err
 }
-
-type cameraSampler struct {
-}
-
-func NewCameraSampler() Sampler {
-	return &cameraSampler{}
-}
-
-func (sampler *cameraSampler) Sample() ([]byte, error) {
-	panic("Must be implemented")
-	// return nil, nil
-}
