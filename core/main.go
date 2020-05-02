@@ -105,4 +105,5 @@ func loadConfig() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Loaded config file.")
 }
