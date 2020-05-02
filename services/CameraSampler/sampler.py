@@ -9,16 +9,16 @@ import io
 import numpy as np
 import cv2
 
-import service_pb2
-import service_pb2_grpc
+import service_camera_sampler_pb2
+import service_camera_sampler_pb2_grpc
 
 
-class Detector(service_pb2_grpc.CameraSampler):
+class Sampler(service_camera_sampler_pb2_grpc.CameraSampler):
 	def __init__(self):
 		super().__init__()
 		self.camera = cv2.VideoCapture(0)
-		self.width = cap.get(3)
-		self.height = cap.get(4)
+		self.width = self.camera.get(3)
+		self.height = self.camera.get(4)
 
 	def SampleImage(self, request, context):
 		ret, frame = cam.read()

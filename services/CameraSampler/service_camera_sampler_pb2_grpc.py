@@ -2,7 +2,7 @@
 import grpc
 
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
-import service_pb2 as service__pb2
+import service_camera_sampler_pb2 as service__camera__sampler__pb2
 
 
 class CameraSamplerStub(object):
@@ -17,7 +17,7 @@ class CameraSamplerStub(object):
         self.SampleImage = channel.unary_unary(
                 '/camera_sampler.CameraSampler/SampleImage',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=service__pb2.Reply.FromString,
+                response_deserializer=service__camera__sampler__pb2.Reply.FromString,
                 )
 
 
@@ -36,7 +36,7 @@ def add_CameraSamplerServicer_to_server(servicer, server):
             'SampleImage': grpc.unary_unary_rpc_method_handler(
                     servicer.SampleImage,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=service__pb2.Reply.SerializeToString,
+                    response_serializer=service__camera__sampler__pb2.Reply.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -60,6 +60,6 @@ class CameraSampler(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/camera_sampler.CameraSampler/SampleImage',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            service__pb2.Reply.FromString,
+            service__camera__sampler__pb2.Reply.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)

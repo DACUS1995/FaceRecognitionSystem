@@ -9,8 +9,8 @@ import io
 import numpy as np
 from PIL import Image
 
-import service_pb2
-import service_pb2_grpc
+import service_face_detector_pb2
+import service_face_detector_pb2_grpc
 from detector import Detector
 
 class Server():
@@ -19,7 +19,7 @@ class Server():
 		self._port = port
 		self._server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-		service_pb2_grpc.add_FaceDetectorServicer_to_server(Detector(), self._server)
+		service_face_detector_pb2_grpc.add_FaceDetectorServicer_to_server(Detector(), self._server)
 		self._server.add_insecure_port(f"{self._address}:{self._port}")
 
 	def run(self):

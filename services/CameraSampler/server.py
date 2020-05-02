@@ -6,8 +6,8 @@ import dlib
 import glob
 import grpc
 
-import service_pb2
-import service_pb2_grpc
+import service_camera_sampler_pb2
+import service_camera_sampler_pb2_grpc
 from sampler import Sampler
 
 class Server():
@@ -16,7 +16,7 @@ class Server():
 		self._port = port
 		self._server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-		service_pb2_grpc.add_CameraSamplerServicer_to_server(Sampler(), self._server)
+		service_camera_sampler_pb2_grpc.add_CameraSamplerServicer_to_server(Sampler(), self._server)
 		self._server.add_insecure_port(f"{self._address}:{self._port}")
 
 	def run(self):

@@ -9,11 +9,11 @@ import io
 import numpy as np
 from PIL import Image
 
-import service_pb2
-import service_pb2_grpc
+import service_face_detector_pb2
+import service_face_detector_pb2_grpc
 
 
-class Detector(service_pb2_grpc.FaceDetector):
+class Detector(service_face_detector_pb2_grpc.FaceDetector):
 	def DetectFaces(self, request, context):
 
 		# for data in request_iterator:
@@ -27,7 +27,7 @@ class Detector(service_pb2_grpc.FaceDetector):
 		image = np.reshape(image, image_shape)
 
 		detected_faces_boxes, detected_faces_embeddings = self._detect_face(image, False)
-		return service_pb2.Reply(
+		return service_face_detector_pb2.Reply(
 			detected_faces_boxes = detected_faces_boxes,
 			detected_faces_embeddings = detected_faces_embeddings
 		)
