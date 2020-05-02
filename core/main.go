@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -10,21 +13,25 @@ import (
 	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
 
-// TODO get faceDetectionServiceAddress from args
-const (
-	faceDetectionServiceAddress = "localhost:50051"
-	cameraSamplerServiceAddress = "localhost:50052"
-	testImagePath               = "./test_images/faces.jpg"
+type configType struct {
+	faceDetectionServiceAddress string `json:"face-detection-service-address"`
+	cameraSamplerServiceAddress string `json:"camera-sampler-service-address"`
+	embeddingVectorSize         int    `json:"embedding-vector-size"`
+}
 
-	EMBEDDING_VECTOR_SIZE = 125
+var config *configType = nil
+
+const (
+	testImagePath = "./test_images/faces.jpg"
 )
 
 var close = make(chan bool)
 var wg = sync.WaitGroup{}
 
 func main() {
-	RunLocalImageFaceDetection(testImagePath)
+	loadConfig()
 
+	RunLocalImageFaceDetection(testImagePath)
 	go RunPeriodicDetection(5000, close)
 
 	<-close
@@ -36,11 +43,11 @@ func gracefulExit() {
 
 func RunPeriodicDetection(miliseconds int, close chan bool) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
-	facedetectorClient, err := facedetector.NewClient(faceDetectionServiceAddress)
+	facedetectorClient, err := facedetector.NewClient(config.faceDetectionServiceAddress)
 	if err != nil {
 		panic("Failed to instantiate client.")
 	}
-	sampler, err := sampler.NewCameraSampler(cameraSamplerServiceAddress)
+	sampler, err := sampler.NewCameraSampler(config.cameraSamplerServiceAddress)
 	if err != nil {
 		panic("Failed to create connection to the sampler.")
 	}
@@ -60,13 +67,13 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 				log.Fatalf("Error: %v", err)
 			}
 
-			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/EMBEDDING_VECTOR_SIZE)
+			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.embeddingVectorSize)
 		}
 	}
 }
 
 func RunLocalImageFaceDetection(testImagePath string) {
-	facedetectorClient, err := facedetector.NewClient(faceDetectionServiceAddress)
+	facedetectorClient, err := facedetector.NewClient(config.faceDetectionServiceAddress)
 	if err != nil {
 		panic("Failed to instantiate client.")
 	}
@@ -82,5 +89,20 @@ func RunLocalImageFaceDetection(testImagePath string) {
 		log.Fatalf("Error: %v", err)
 	}
 
-	fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/EMBEDDING_VECTOR_SIZE)
+	fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.embeddingVectorSize)
+}
+
+func loadConfig() {
+	jsonFile, err := os.Open("./config.json")
+	if err != nil {
+		panic("Failed to load config")
+	}
+	defer jsonFile.Close()
+
+	byteValues, _ := ioutil.ReadAll(jsonFile)
+
+	err = json.Unmarshal(byteValues, &config)
+	if err != nil {
+		panic(err)
+	}
 }
