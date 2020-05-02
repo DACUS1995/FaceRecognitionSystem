@@ -14,9 +14,9 @@ import (
 )
 
 type configType struct {
-	faceDetectionServiceAddress string `json:"face-detection-service-address"`
-	cameraSamplerServiceAddress string `json:"camera-sampler-service-address"`
-	embeddingVectorSize         int    `json:"embedding-vector-size"`
+	FaceDetectionServiceAddress string `json:"face-detection-service-address"`
+	CameraSamplerServiceAddress string `json:"camera-sampler-service-address"`
+	EmbeddingVectorSize         int    `json:"embedding-vector-size"`
 }
 
 var config *configType = nil
@@ -43,11 +43,11 @@ func gracefulExit() {
 
 func RunPeriodicDetection(miliseconds int, close chan bool) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
-	facedetectorClient, err := facedetector.NewClient(config.faceDetectionServiceAddress)
+	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
 	if err != nil {
 		panic("Failed to instantiate client.")
 	}
-	sampler, err := sampler.NewCameraSampler(config.cameraSamplerServiceAddress)
+	sampler, err := sampler.NewCameraSampler(config.CameraSamplerServiceAddress)
 	if err != nil {
 		panic("Failed to create connection to the sampler.")
 	}
@@ -67,13 +67,13 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 				log.Fatalf("Error: %v", err)
 			}
 
-			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.embeddingVectorSize)
+			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.EmbeddingVectorSize)
 		}
 	}
 }
 
 func RunLocalImageFaceDetection(testImagePath string) {
-	facedetectorClient, err := facedetector.NewClient(config.faceDetectionServiceAddress)
+	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
 	if err != nil {
 		panic("Failed to instantiate client.")
 	}
@@ -89,7 +89,7 @@ func RunLocalImageFaceDetection(testImagePath string) {
 		log.Fatalf("Error: %v", err)
 	}
 
-	fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.embeddingVectorSize)
+	fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.EmbeddingVectorSize)
 }
 
 func loadConfig() {
