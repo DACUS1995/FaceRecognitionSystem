@@ -31,15 +31,14 @@ func NewCameraSampler(address string) (*cameraSampler, error) {
 	}, nil
 }
 
-// TODO change Sample method to return the shape of the image
-func (sampler *cameraSampler) Sample() ([]byte, error) {
+func (sampler *cameraSampler) Sample() ([]byte, []int32, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	response, err := sampler.grpcClient.SampleImage(ctx, &emptypb.Empty{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return response.GetImage(), nil
+	return response.GetImage(), response.GetImageShape(), nil
 }

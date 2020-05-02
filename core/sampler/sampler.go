@@ -5,8 +5,10 @@ import (
 	"log"
 )
 
+var imageShape = []int32{349, 620, 3}
+
 type Sampler interface {
-	Sample() ([]byte, error)
+	Sample() ([]byte, []int32, error)
 }
 
 type localSampler struct {
@@ -17,12 +19,12 @@ func NewLocalSampler(imagePath string) Sampler {
 	return &localSampler{imagePath}
 }
 
-func (sampler *localSampler) Sample() ([]byte, error) {
+func (sampler *localSampler) Sample() ([]byte, []int32, error) {
 	data, err := ioutil.ReadFile(sampler.imagePath)
 	if err != nil {
 		log.Fatalf("Failed to open file: %v", sampler.imagePath)
-		return nil, err
+		return nil, nil, err
 	}
 
-	return data, err
+	return data, imageShape, err
 }

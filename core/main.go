@@ -10,17 +10,17 @@ import (
 	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
 
+// TODO get faceDetectionServiceAddress from args
 const (
-	address       = "localhost:50051"
-	testImagePath = "./test_images/faces.jpg"
+	faceDetectionServiceAddress = "localhost:50051"
+	cameraSamplerServiceAddress = "localhost:50052"
+	testImagePath               = "./test_images/faces.jpg"
 
 	EMBEDDING_VECTOR_SIZE = 125
 )
 
 var close = make(chan bool)
 var wg = sync.WaitGroup{}
-
-var imageShape = []int32{349, 620, 3}
 
 func main() {
 	RunLocalImageFaceDetection(testImagePath)
@@ -36,18 +36,21 @@ func gracefulExit() {
 
 func RunPeriodicDetection(miliseconds int, close chan bool) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
-	facedetectorClient, err := facedetector.NewClient(address)
+	facedetectorClient, err := facedetector.NewClient(faceDetectionServiceAddress)
 	if err != nil {
 		panic("Failed to instantiate client.")
 	}
-	sampler := sampler.NewCameraSampler()
+	sampler, err := sampler.NewCameraSampler(cameraSamplerServiceAddress)
+	if err != nil {
+		panic("Failed to create connection to the sampler.")
+	}
 
 	for {
 		select {
 		case <-close:
 			return
 		case <-ticker.C:
-			data, err := sampler.Sample()
+			data, imageShape, err := sampler.Sample()
 			if err != nil {
 				panic("Failed to sample the test image")
 			}
@@ -63,12 +66,12 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 }
 
 func RunLocalImageFaceDetection(testImagePath string) {
-	facedetectorClient, err := facedetector.NewClient(address)
+	facedetectorClient, err := facedetector.NewClient(faceDetectionServiceAddress)
 	if err != nil {
 		panic("Failed to instantiate client.")
 	}
 	sampler := sampler.NewLocalSampler(testImagePath)
-	data, err := sampler.Sample()
+	data, imageShape, err := sampler.Sample()
 
 	if err != nil {
 		panic("Failed to sample the test image")
