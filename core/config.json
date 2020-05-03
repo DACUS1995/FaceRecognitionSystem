@@ -1,5 +1,5 @@
 {
 	"face-detection-service-address": "localhost:50051",
-	"camera-sampler-service-address":"localhost:50051",
+	"camera-sampler-service-address":"localhost:50052",
 	"embedding-vector-size": 125
 }

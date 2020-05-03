@@ -20,12 +20,12 @@ class Sampler(service_camera_sampler_pb2_grpc.CameraSampler):
 		self.height = self.camera.get(4)
 
 	def SampleImage(self, request, context):
-		ret, frame = cam.read()
+		ret, frame = self.camera.read()
 
 
-		return service_pb2.Reply(
+		return service_camera_sampler_pb2.Reply(
 			image = frame.tobytes(),
-			image_shape = [self.width, self.height]
+			image_shape = [int(self.width), int(self.height)]
 		)
 
 

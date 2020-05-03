@@ -59,7 +59,7 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 		case <-ticker.C:
 			data, imageShape, err := sampler.Sample()
 			if err != nil {
-				panic("Failed to sample the test image")
+				panic(err)
 			}
 
 			_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)
