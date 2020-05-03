@@ -2,7 +2,6 @@ from concurrent import futures
 import logging
 import sys
 import os
-import dlib
 import glob
 import grpc
 
