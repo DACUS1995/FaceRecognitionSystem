@@ -1,0 +1,16 @@
+[Unit]
+Description=Core Face Detector
+After=multi-user.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/python <ROOT PATH>/services/CameraSampler/server.py
+StandardInput=tty-force
+KillMode=process
+StartLimitInterval=5
+StartLimitBurst=1
+RestartSec=5
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
