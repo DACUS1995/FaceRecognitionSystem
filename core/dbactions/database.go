@@ -5,6 +5,7 @@ type DatabaseClient interface {
 	SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32)
 	GetAll() []DatabaseRecord
 	Save()
+	Load()
 }
 
 type DatabaseRecord struct {

@@ -57,6 +57,10 @@ func (client *JSONDatabaseClient) Save() {
 	client.database.saveDatabase()
 }
 
+func (client *JSONDatabaseClient) Load() {
+	client.database.loadDatabase()
+}
+
 func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32) {
 	result := []DatabaseRecord{}
 	similarities := []float32{}

@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DACUS1995/FaceRecognition/core/dbactions"
 	facedetector "github.com/DACUS1995/FaceRecognition/core/face_detector"
 	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
@@ -30,6 +31,8 @@ var wg = sync.WaitGroup{}
 
 func main() {
 	loadConfig()
+	databaseClient := GetDatabase()
+	// TODO Continue here
 
 	RunLocalImageFaceDetection(testImagePath)
 	go RunPeriodicDetection(5000, close)
@@ -41,12 +44,20 @@ func gracefulExit() {
 	close <- true
 }
 
+func GetDatabase() {
+	databaseClient := dbactions.NewJSONDatabaseClient()
+	databaseClient.Load()
+	return databaseClient
+}
+
 func RunPeriodicDetection(miliseconds int, close chan bool) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
+
 	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
 	if err != nil {
 		log.Panic("Failed to instantiate client.")
 	}
+
 	sampler, err := sampler.NewCameraSampler(config.CameraSamplerServiceAddress)
 	if err != nil {
 		log.Panic("Failed to create connection to the sampler.")
@@ -64,7 +75,7 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 
 			_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)
 			if err != nil {
-				log.Println("Error: %v", err)
+				log.Printf("Error: %v", err)
 			}
 
 			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.EmbeddingVectorSize)
@@ -90,6 +101,7 @@ func RunLocalImageFaceDetection(testImagePath string) {
 	}
 
 	fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.EmbeddingVectorSize)
+
 }
 
 func loadConfig() {
