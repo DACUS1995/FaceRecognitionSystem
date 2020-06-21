@@ -49,6 +49,7 @@ require (
 	github.com/pkg/sftp v1.11.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd // indirect
+	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/syndtr/goleveldb v1.0.0 // indirect
 	golang.org/x/build v0.0.0-20200420204122-5910a274a238 // indirect

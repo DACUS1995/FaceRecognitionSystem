@@ -13,13 +13,13 @@ import (
 func TestFaceRecognition(t *testing.T) {
 	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
 	if err != nil {
-		panic("Failed to instantiate facedetection client.")
+		log.Panic("Failed to instantiate facedetection client.")
 	}
 	sampler := sampler.NewLocalSampler(testImagePath)
 	data, imageShape, err := sampler.Sample()
 
 	if err != nil {
-		panic("Failed to sample the test image")
+		log.Panic("Failed to sample the test image")
 	}
 
 	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)

@@ -45,11 +45,11 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
 	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
 	if err != nil {
-		panic("Failed to instantiate client.")
+		log.Panic("Failed to instantiate client.")
 	}
 	sampler, err := sampler.NewCameraSampler(config.CameraSamplerServiceAddress)
 	if err != nil {
-		panic("Failed to create connection to the sampler.")
+		log.Panic("Failed to create connection to the sampler.")
 	}
 
 	for {
@@ -59,12 +59,12 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 		case <-ticker.C:
 			data, imageShape, err := sampler.Sample()
 			if err != nil {
-				panic(err)
+				log.Println(err)
 			}
 
 			_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)
 			if err != nil {
-				log.Fatalf("Error: %v", err)
+				log.Println("Error: %v", err)
 			}
 
 			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.EmbeddingVectorSize)
@@ -75,13 +75,13 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 func RunLocalImageFaceDetection(testImagePath string) {
 	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
 	if err != nil {
-		panic("Failed to instantiate client.")
+		log.Panic("Failed to instantiate client.")
 	}
 	sampler := sampler.NewLocalSampler(testImagePath)
 	data, imageShape, err := sampler.Sample()
 
 	if err != nil {
-		panic("Failed to sample the test image")
+		log.Panic("Failed to sample the test image")
 	}
 
 	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)
@@ -95,7 +95,7 @@ func RunLocalImageFaceDetection(testImagePath string) {
 func loadConfig() {
 	jsonFile, err := os.Open("./config.json")
 	if err != nil {
-		panic("Failed to load config")
+		log.Panic("Failed to load config")
 	}
 	defer jsonFile.Close()
 
@@ -103,7 +103,7 @@ func loadConfig() {
 
 	err = json.Unmarshal(byteValues, &config)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	fmt.Printf("Loaded config file.")
 }
