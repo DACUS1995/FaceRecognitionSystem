@@ -1,5 +1,7 @@
 {
 	"face-detection-service-address": "localhost:50051",
 	"camera-sampler-service-address":"localhost:50052",
-	"embedding-vector-size": 125
+	"embedding-vector-size": 125,
+	"sampling-interval-miliseconds": 5000,
+	"test-image-path": "./test_images/faces.jpg"
 }

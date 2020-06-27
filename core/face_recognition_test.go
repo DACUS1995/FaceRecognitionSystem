@@ -11,11 +11,11 @@ import (
 )
 
 func TestFaceRecognition(t *testing.T) {
-	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
+	facedetectorClient, err := facedetector.NewClient(*config.FaceDetectionServiceAddress)
 	if err != nil {
 		log.Panic("Failed to instantiate facedetection client.")
 	}
-	sampler := sampler.NewLocalSampler(testImagePath)
+	sampler := sampler.NewLocalSampler(*config.TestImagePath)
 	data, imageShape, err := sampler.Sample()
 
 	if err != nil {
@@ -28,7 +28,7 @@ func TestFaceRecognition(t *testing.T) {
 	}
 
 	databaseClient := dbactions.NewJSONDatabaseClient()
-	databaseClient.AddRecord("Anchorman", detectedFacesEmbeddings[:config.EmbeddingVectorSize])
+	databaseClient.AddRecord("Anchorman", detectedFacesEmbeddings[:*config.EmbeddingVectorSize])
 	databaseClient.Save()
 
 	_, detectedFacesEmbeddings, err = facedetectorClient.DetectFaces(data, imageShape)
@@ -38,8 +38,8 @@ func TestFaceRecognition(t *testing.T) {
 
 	found := false
 
-	for idx := 0; idx < len(detectedFacesEmbeddings)-config.EmbeddingVectorSize; idx += config.EmbeddingVectorSize {
-		if records, similarities := databaseClient.SearchRecordBySimilarity(detectedFacesEmbeddings[idx : idx+config.EmbeddingVectorSize]); len(records) > 0 {
+	for idx := 0; idx < len(detectedFacesEmbeddings)-*config.EmbeddingVectorSize; idx += *config.EmbeddingVectorSize {
+		if records, similarities := databaseClient.SearchRecordBySimilarity(detectedFacesEmbeddings[idx : idx+*config.EmbeddingVectorSize]); len(records) > 0 {
 			fmt.Printf("Found: %v records\n", len(records))
 
 			for i, record := range records {

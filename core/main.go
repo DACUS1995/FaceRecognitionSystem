@@ -1,67 +1,59 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 	"sync"
 	"time"
 
+	"github.com/DACUS1995/FaceRecognition/core/config"
 	"github.com/DACUS1995/FaceRecognition/core/dbactions"
 	facedetector "github.com/DACUS1995/FaceRecognition/core/face_detector"
 	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
 
-type configType struct {
-	FaceDetectionServiceAddress string `json:"face-detection-service-address"`
-	CameraSamplerServiceAddress string `json:"camera-sampler-service-address"`
-	EmbeddingVectorSize         int    `json:"embedding-vector-size"`
-}
-
-var config *configType = nil
-
-const (
-	testImagePath = "./test_images/faces.jpg"
-)
+var Config *ConfigType = nil
 
 var close = make(chan bool)
 var wg = sync.WaitGroup{}
 
 func main() {
-	loadConfig()
+	Config = config.GetConfig()
 	databaseClient := GetDatabase()
-	// TODO Continue here
 
-	RunLocalImageFaceDetection(testImagePath)
-	go RunPeriodicDetection(5000, close)
+	if Config.TestImagePath != nil {
+		RunLocalImageFaceDetection(*Config.TestImagePath)
+	}
+
+	go RunPeriodicDetection(*Config.SamplingIntervalMiliseconds, close, databaseClient)
 
 	<-close
 }
 
 func gracefulExit() {
+	log.Printf("Trying to gracefully exit.")
 	close <- true
 }
 
-func GetDatabase() {
+func GetDatabase() dbactions.DatabaseClient {
 	databaseClient := dbactions.NewJSONDatabaseClient()
 	databaseClient.Load()
 	return databaseClient
 }
 
-func RunPeriodicDetection(miliseconds int, close chan bool) {
+func RunPeriodicDetection(miliseconds int, close chan bool, databaseClient dbactions.DatabaseClient) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
 
-	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
+	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
 	if err != nil {
-		log.Panic("Failed to instantiate client.")
+		log.Panicf("Failed to instantiate client: %v", err)
 	}
 
-	sampler, err := sampler.NewCameraSampler(config.CameraSamplerServiceAddress)
+	sampler, err := sampler.NewCameraSampler(*Config.CameraSamplerServiceAddress)
 	if err != nil {
 		log.Panic("Failed to create connection to the sampler.")
 	}
+
+	detectionHandler := facedetector.NewDatatabaseSeacher(databaseClient)
 
 	for {
 		select {
@@ -73,49 +65,35 @@ func RunPeriodicDetection(miliseconds int, close chan bool) {
 				log.Println(err)
 			}
 
-			_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)
+			boundingBoxes, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)
 			if err != nil {
 				log.Printf("Error: %v", err)
 			}
 
-			fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.EmbeddingVectorSize)
+			detectionHandler.Handle(boundingBoxes, detectedFacesEmbeddings)
+
+			// log.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/(*Config.EmbeddingVectorSize))
 		}
 	}
 }
 
 func RunLocalImageFaceDetection(testImagePath string) {
-	facedetectorClient, err := facedetector.NewClient(config.FaceDetectionServiceAddress)
+	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
 	if err != nil {
-		log.Panic("Failed to instantiate client.")
+		log.Panicf("Failed to instantiate client: %v", err)
 	}
 	sampler := sampler.NewLocalSampler(testImagePath)
 	data, imageShape, err := sampler.Sample()
 
 	if err != nil {
-		log.Panic("Failed to sample the test image")
+		log.Panicf("Failed to sample the test image: %v", err)
 	}
 
 	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(data, imageShape)
 	if err != nil {
-		log.Fatalf("Error: %v", err)
+		log.Panicf("Error: %v", err)
 	}
 
-	fmt.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/config.EmbeddingVectorSize)
+	log.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/(*Config.EmbeddingVectorSize))
 
-}
-
-func loadConfig() {
-	jsonFile, err := os.Open("./config.json")
-	if err != nil {
-		log.Panic("Failed to load config")
-	}
-	defer jsonFile.Close()
-
-	byteValues, _ := ioutil.ReadAll(jsonFile)
-
-	err = json.Unmarshal(byteValues, &config)
-	if err != nil {
-		log.Panic(err)
-	}
-	fmt.Printf("Loaded config file.")
 }
