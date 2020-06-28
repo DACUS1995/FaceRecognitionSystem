@@ -51,7 +51,7 @@ require (
 	github.com/rwcarlsen/goexif v0.0.0-20190401172101-9e8deecbddbd // indirect
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/afero v1.2.2 // indirect
-	github.com/syndtr/goleveldb v1.0.0 // indirect
+	github.com/syndtr/goleveldb v1.0.0
 	golang.org/x/build v0.0.0-20200420204122-5910a274a238 // indirect
 	golang.org/x/image v0.0.0-20200119044424-58c23975cae1 // indirect
 	golang.org/x/mobile v0.0.0-20200329125638-4c31acba0007 // indirect
