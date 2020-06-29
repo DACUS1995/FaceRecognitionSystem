@@ -30,23 +30,23 @@ func NewJSONDatabaseClient() DatabaseClient {
 	return &JSONDatabaseClient{database}
 }
 
-func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) {
+func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) error {
 	for _, record := range client.database.recordCollection {
 		if record.Name == name {
 			record.Embedding = embedding
+			return nil
 		}
-
-		return
 	}
 
 	client.database.recordCollection = append(
 		client.database.recordCollection,
 		DatabaseRecord{
-			len(client.database.recordCollection),
 			name,
 			embedding,
 		},
 	)
+
+	return nil
 }
 
 func (client *JSONDatabaseClient) GetAll() []DatabaseRecord {
@@ -59,6 +59,10 @@ func (client *JSONDatabaseClient) Save() {
 
 func (client *JSONDatabaseClient) Load() {
 	client.database.loadDatabase()
+}
+
+func (client *JSONDatabaseClient) Close() {
+	client.Save()
 }
 
 func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32) {
