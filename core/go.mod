@@ -39,6 +39,7 @@ require (
 	github.com/gonum/matrix v0.0.0-20181209220409-c518dec07be9 // indirect
 	github.com/google/pprof v0.0.0-20200417002340-c6e0a841f49a // indirect
 	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
+	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/grpc-gateway v1.14.4 // indirect
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334 // indirect
 	github.com/jung-kurt/gofpdf v1.16.2 // indirect
