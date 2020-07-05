@@ -1,22 +1,28 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
+	_ "image/jpeg"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 
 	"github.com/DACUS1995/FaceRecognition/core/config"
 	"github.com/DACUS1995/FaceRecognition/core/dbactions"
 	facedetector "github.com/DACUS1995/FaceRecognition/core/face_detector"
 )
 
-var Config *ConfigType = nil
+var Config *config.ConfigType = nil
 
-func InitServer() {
+func StartServer() {
 	Config = config.GetConfig()
 	// TODO get a database injected
 	router := mux.NewRouter()
@@ -31,20 +37,47 @@ func InitServer() {
 }
 
 func generateEmbedding(w http.ResponseWriter, r *http.Request) {
-	image, _ := ioutil.ReadAll(r.Body)
-	// TODO: get image shape
+	var buf bytes.Buffer
+	tee := io.TeeReader(r.Body, &buf)
+
+	imageConfig, _, err := image.DecodeConfig(tee)
+
+	if err != nil {
+		log.Printf("%+v", errors.WithStack(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	imageShape := []int32{int32(imageConfig.Width), int32(imageConfig.Height)}
+
+	// file, _ := os.Open("C:\\Users\\Tudor\\Pictures\\dr-house.jpeg")
+	// defer file.Close()
 
 	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
 	if err != nil {
-		log.Panicf("Failed to instantiate client: %v", err)
+		log.Printf("Failed to instantiate client: %v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(image, imageShape)
+	img, _ := ioutil.ReadAll(tee)
+	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(img, imageShape)
 	if err != nil {
-		log.Panicf("Error: %v", err)
+		log.Printf("Error: %v", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	fmt.Fprintf(w, "123123")
+	detectedFacesEmbeddingsText := []string{}
+	for i := range detectedFacesEmbeddings {
+		numberFloat := detectedFacesEmbeddings[i]
+		textFloat := fmt.Sprintf("%f", numberFloat)
+		detectedFacesEmbeddingsText = append(detectedFacesEmbeddingsText, textFloat)
+	}
+
+	// Join our string slice.
+	detectedFacesEmbeddingsJoined := strings.Join(detectedFacesEmbeddingsText, "+")
+
+	fmt.Fprintf(w, detectedFacesEmbeddingsJoined)
 	fmt.Println("Generated a new embedding")
 }
 

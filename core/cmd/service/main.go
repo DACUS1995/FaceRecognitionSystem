@@ -12,7 +12,7 @@ import (
 	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
 
-var Config *ConfigType = nil
+var Config *config.ConfigType = nil
 
 var close = make(chan bool)
 var wg = sync.WaitGroup{}
@@ -21,7 +21,7 @@ func main() {
 	Config = config.GetConfig()
 	databaseClient := GetDatabase()
 
-	api.InitServer()
+	api.StartServer()
 
 	if Config.TestImagePath != nil {
 		RunLocalImageFaceDetection(*Config.TestImagePath)

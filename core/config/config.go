@@ -27,7 +27,6 @@ func GetConfig() *ConfigType {
 
 func loadConfig() {
 	config = &ConfigType{}
-
 	jsonFile, err := os.Open("./config.json")
 	if err != nil {
 		log.Panicf("Failed to load config: %v", err)
