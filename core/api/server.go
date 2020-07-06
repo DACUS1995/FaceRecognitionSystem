@@ -49,9 +49,6 @@ func generateEmbedding(w http.ResponseWriter, r *http.Request) {
 	}
 	imageShape := []int32{int32(imageConfig.Width), int32(imageConfig.Height)}
 
-	// file, _ := os.Open("C:\\Users\\Tudor\\Pictures\\dr-house.jpeg")
-	// defer file.Close()
-
 	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
 	if err != nil {
 		log.Printf("Failed to instantiate client: %v", err)
