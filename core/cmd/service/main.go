@@ -21,7 +21,7 @@ func main() {
 	Config = config.GetConfig()
 	databaseClient := GetDatabase()
 
-	api.StartServer()
+	api.StartServer(databaseClient)
 
 	if Config.TestImagePath != nil {
 		RunLocalImageFaceDetection(*Config.TestImagePath)

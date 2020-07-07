@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+//TODO Add syncronization to this db implementation
 type JSONDatabase struct {
 	savePath         string
 	numberOfRecords  int

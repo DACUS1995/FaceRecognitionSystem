@@ -21,10 +21,11 @@ import (
 )
 
 var Config *config.ConfigType = nil
+var DatabaseClient *dbactions.DatabaseClient = nil
 
-func StartServer() {
+func StartServer(databaseClient dbactions.DatabaseClient) {
 	Config = config.GetConfig()
-	// TODO get a database injected
+	DatabaseClient = &databaseClient
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", homeHandler)
@@ -41,38 +42,23 @@ func generateEmbedding(w http.ResponseWriter, r *http.Request) {
 	tee := io.TeeReader(r.Body, &buf)
 
 	imageConfig, _, err := image.DecodeConfig(tee)
-
 	if err != nil {
 		log.Printf("%+v", errors.WithStack(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	imageShape := []int32{int32(imageConfig.Width), int32(imageConfig.Height)}
-
-	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
-	if err != nil {
-		log.Printf("Failed to instantiate client: %v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	img, _ := ioutil.ReadAll(tee)
-	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(img, imageShape)
+
+	detectedFacesEmbeddingsText, err := computeEmbedding(img, imageShape)
 	if err != nil {
-		log.Printf("Error: %v", err)
+		log.Printf("%+v", errors.WithStack(err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	detectedFacesEmbeddingsText := []string{}
-	for i := range detectedFacesEmbeddings {
-		numberFloat := detectedFacesEmbeddings[i]
-		textFloat := fmt.Sprintf("%f", numberFloat)
-		detectedFacesEmbeddingsText = append(detectedFacesEmbeddingsText, textFloat)
-	}
-
-	// Join our string slice.
-	detectedFacesEmbeddingsJoined := strings.Join(detectedFacesEmbeddingsText, "+")
+	detectedFacesEmbeddingsJoined := strings.Join(detectedFacesEmbeddingsText, ",")
 
 	fmt.Fprintf(w, detectedFacesEmbeddingsJoined)
 	fmt.Println("Generated a new embedding")
@@ -82,7 +68,13 @@ func createNewEmbedding(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
 	newRecord := dbactions.DatabaseRecord{}
-	json.Unmarshal(reqBody, &newRecord)
+
+	err := json.Unmarshal(reqBody, &newRecord)
+	if err != nil {
+		log.Printf("%+v", errors.WithStack(err))
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	fmt.Println("Added a new embedding")
 }
@@ -94,4 +86,27 @@ func getAllEmbeddings(w http.ResponseWriter, r *http.Request) {
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
+}
+
+func computeEmbedding(img []byte, imageShape []int32) ([]string, error) {
+	// TODO reuse the facedetector client between requests
+	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
+	if err != nil {
+		log.Printf("Failed to instantiate client: %v", err)
+		return nil, errors.WithStack(err)
+	}
+
+	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(img, imageShape)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return nil, errors.WithStack(err)
+	}
+
+	detectedFacesEmbeddingsText := []string{}
+	for i := range detectedFacesEmbeddings {
+		numberFloat := detectedFacesEmbeddings[i]
+		textFloat := fmt.Sprintf("%f", numberFloat)
+		detectedFacesEmbeddingsText = append(detectedFacesEmbeddingsText, textFloat)
+	}
+	return detectedFacesEmbeddingsText, nil
 }
