@@ -20,6 +20,8 @@ import (
 	facedetector "github.com/DACUS1995/FaceRecognition/core/face_detector"
 )
 
+// TODO Use a pool for the database connections
+
 var Config *config.ConfigType = nil
 var DatabaseClient *dbactions.DatabaseClient = nil
 
