@@ -24,6 +24,7 @@ import (
 
 var Config *config.ConfigType = nil
 var DatabaseClient *dbactions.DatabaseClient = nil
+var FaceDetectorClient *facedetector.Client = nil
 
 func StartServer(databaseClient dbactions.DatabaseClient) {
 	Config = config.GetConfig()
@@ -91,12 +92,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func computeEmbedding(img []byte, imageShape []int32) ([]string, error) {
-	// TODO reuse the facedetector client between requests
-	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
-	if err != nil {
-		log.Printf("Failed to instantiate client: %v", err)
-		return nil, errors.WithStack(err)
-	}
+	facedetectorClient := getFaceDetectorClient()
 
 	_, detectedFacesEmbeddings, err := facedetectorClient.DetectFaces(img, imageShape)
 	if err != nil {
@@ -111,4 +107,17 @@ func computeEmbedding(img []byte, imageShape []int32) ([]string, error) {
 		detectedFacesEmbeddingsText = append(detectedFacesEmbeddingsText, textFloat)
 	}
 	return detectedFacesEmbeddingsText, nil
+}
+
+func getFaceDetectorClient() *facedetector.Client {
+	if FaceDetectorClient == nil {
+		faceDetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
+		FaceDetectorClient = faceDetectorClient
+
+		if err != nil {
+			log.Panicf("Failed to instantiate client: %v", err)
+		}
+	}
+
+	return FaceDetectorClient
 }
