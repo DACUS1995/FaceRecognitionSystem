@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
+	"sync"
 )
 
 type JSONDatabase struct {
@@ -17,6 +18,7 @@ type JSONDatabase struct {
 
 type JSONDatabaseClient struct {
 	database *JSONDatabase
+	mux      sync.Mutex
 }
 
 var databasePath string = "./"
@@ -24,13 +26,21 @@ var database *JSONDatabase = nil
 
 func NewJSONDatabaseClient() DatabaseClient {
 	if database == nil {
-		database = &JSONDatabase{databasePath, 0, []DatabaseRecord{}}
+		database = &JSONDatabase{
+			databasePath,
+			0,
+			[]DatabaseRecord{},
+		}
 	}
 
-	return &JSONDatabaseClient{database}
+	return &JSONDatabaseClient{
+		database: database,
+	}
 }
 
 func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) error {
+	client.mux.Lock()
+	defer client.mux.Unlock()
 	for _, record := range client.database.recordCollection {
 		if record.Name == name {
 			record.Embedding = embedding
@@ -50,22 +60,37 @@ func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) er
 }
 
 func (client *JSONDatabaseClient) GetAll() []DatabaseRecord {
+	client.mux.Lock()
+	defer client.mux.Unlock()
+
 	return client.database.recordCollection
 }
 
 func (client *JSONDatabaseClient) Save() {
+	client.mux.Lock()
+	defer client.mux.Unlock()
+
 	client.database.saveDatabase()
 }
 
 func (client *JSONDatabaseClient) Load() {
+	client.mux.Lock()
+	defer client.mux.Unlock()
+
 	client.database.loadDatabase()
 }
 
 func (client *JSONDatabaseClient) Close() {
+	client.mux.Lock()
+	defer client.mux.Unlock()
+
 	client.Save()
 }
 
 func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32) {
+	client.mux.Lock()
+	defer client.mux.Unlock()
+
 	result := []DatabaseRecord{}
 	similarities := []float32{}
 

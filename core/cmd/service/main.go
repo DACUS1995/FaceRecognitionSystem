@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DACUS1995/FaceRecognition/core/api"
 	"github.com/DACUS1995/FaceRecognition/core/config"
 	"github.com/DACUS1995/FaceRecognition/core/dbactions"
 	facedetector "github.com/DACUS1995/FaceRecognition/core/face_detector"
@@ -20,11 +21,17 @@ func main() {
 	Config = config.GetConfig()
 	databaseClient := GetDatabase()
 
+	api.StartServer(databaseClient)
+
 	if Config.TestImagePath != nil {
 		RunLocalImageFaceDetection(*Config.TestImagePath)
 	}
 
-	go RunPeriodicDetection(*Config.SamplingIntervalMiliseconds, close, databaseClient)
+	go RunPeriodicDetection(
+		*Config.SamplingIntervalMiliseconds,
+		close,
+		databaseClient,
+	)
 
 	<-close
 }
