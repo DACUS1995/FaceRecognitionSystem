@@ -11,7 +11,7 @@ import (
 	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
 
-var Config *ConfigType = nil
+var Config *config.ConfigType = nil
 
 var close = make(chan bool)
 var wg = sync.WaitGroup{}

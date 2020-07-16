@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-type configType struct {
+type ConfigType struct {
 	FaceDetectionServiceAddress *string `json:"face-detection-service-address"`
 	CameraSamplerServiceAddress *string `json:"camera-sampler-service-address"`
 	EmbeddingVectorSize         *int    `json:"embedding-vector-size"`
@@ -15,9 +15,9 @@ type configType struct {
 	TestImagePath               *string `json:"test-image-path"`
 }
 
-var config *configType = nil
+var config *ConfigType = nil
 
-func GetConfig() *configType {
+func GetConfig() *ConfigType {
 	if config == nil {
 		loadConfig()
 	}
