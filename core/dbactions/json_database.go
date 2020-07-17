@@ -19,7 +19,7 @@ type JSONDatabase struct {
 
 type JSONDatabaseClient struct {
 	database *JSONDatabase
-	mux      sync.Mutex
+	mux      sync.RWMutex
 }
 
 var databasePath string = "./"
@@ -67,19 +67,22 @@ func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) er
 }
 
 func (client *JSONDatabaseClient) GetAll() ([]DatabaseRecord, error) {
-	client.mux.Lock()
-	defer client.mux.Unlock()
+	client.mux.RLock()
+	defer client.mux.RUnlock()
 
 	if client.isClosed() {
 		return nil, ErrDatabaseClosed
 	}
 
-	return client.database.recordCollection, nil
+	newRecordCollection := []DatabaseRecord{}
+	copy(client.database.recordCollection, newRecordCollection)
+
+	return newRecordCollection, nil
 }
 
 func (client *JSONDatabaseClient) Save() error {
-	client.mux.Lock()
-	defer client.mux.Unlock()
+	client.mux.RLock()
+	defer client.mux.RUnlock()
 
 	if client.isClosed() {
 		return ErrDatabaseClosed
@@ -115,8 +118,8 @@ func (client *JSONDatabaseClient) Close() error {
 }
 
 func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32, error) {
-	client.mux.Lock()
-	defer client.mux.Unlock()
+	client.mux.RLock()
+	defer client.mux.RUnlock()
 
 	if client.isClosed() {
 		return nil, nil, ErrDatabaseClosed
