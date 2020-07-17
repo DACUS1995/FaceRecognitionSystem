@@ -25,23 +25,26 @@ func (client *LevelDBDatabaseClient) AddRecord(name string, embedding []float32)
 	return nil
 }
 
-func (client *LevelDBDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32) {
-	return []DatabaseRecord{}, []float32{}
+func (client *LevelDBDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32, error) {
+	return []DatabaseRecord{}, []float32{}, nil
 }
 
-func (client *LevelDBDatabaseClient) GetAll() []DatabaseRecord {
-	return []DatabaseRecord{}
+func (client *LevelDBDatabaseClient) GetAll() ([]DatabaseRecord, error) {
+	return []DatabaseRecord{}, nil
 }
 
-func (client *LevelDBDatabaseClient) Save() {
+func (client *LevelDBDatabaseClient) Save() error {
+	return nil
 }
 
-func (client *LevelDBDatabaseClient) Load() {
+func (client *LevelDBDatabaseClient) Load() error {
 	client.init()
+	return nil
 }
 
-func (client *LevelDBDatabaseClient) Close() {
+func (client *LevelDBDatabaseClient) Close() error {
 	client.database.Close()
+	return nil
 }
 
 func (client *LevelDBDatabaseClient) init() {

@@ -14,6 +14,7 @@ type JSONDatabase struct {
 	savePath         string
 	numberOfRecords  int
 	recordCollection []DatabaseRecord
+	open             bool
 }
 
 type JSONDatabaseClient struct {
@@ -30,6 +31,7 @@ func NewJSONDatabaseClient() DatabaseClient {
 			databasePath,
 			0,
 			[]DatabaseRecord{},
+			true,
 		}
 	}
 
@@ -41,6 +43,11 @@ func NewJSONDatabaseClient() DatabaseClient {
 func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) error {
 	client.mux.Lock()
 	defer client.mux.Unlock()
+
+	if client.isClosed() {
+		return ErrDatabaseClosed
+	}
+
 	for _, record := range client.database.recordCollection {
 		if record.Name == name {
 			record.Embedding = embedding
@@ -59,37 +66,61 @@ func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) er
 	return nil
 }
 
-func (client *JSONDatabaseClient) GetAll() []DatabaseRecord {
+func (client *JSONDatabaseClient) GetAll() ([]DatabaseRecord, error) {
 	client.mux.Lock()
 	defer client.mux.Unlock()
 
-	return client.database.recordCollection
+	if client.isClosed() {
+		return nil, ErrDatabaseClosed
+	}
+
+	return client.database.recordCollection, nil
 }
 
-func (client *JSONDatabaseClient) Save() {
+func (client *JSONDatabaseClient) Save() error {
 	client.mux.Lock()
 	defer client.mux.Unlock()
+
+	if client.isClosed() {
+		return ErrDatabaseClosed
+	}
 
 	client.database.saveDatabase()
+	return nil
 }
 
-func (client *JSONDatabaseClient) Load() {
+func (client *JSONDatabaseClient) Load() error {
 	client.mux.Lock()
 	defer client.mux.Unlock()
+
+	if client.isClosed() {
+		return ErrDatabaseClosed
+	}
 
 	client.database.loadDatabase()
+	return nil
 }
 
-func (client *JSONDatabaseClient) Close() {
+func (client *JSONDatabaseClient) Close() error {
 	client.mux.Lock()
 	defer client.mux.Unlock()
+
+	if client.isClosed() {
+		return ErrDatabaseClosed
+	}
 
 	client.Save()
+	client.database.open = false
+	return nil
 }
 
-func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32) {
+func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float32) ([]DatabaseRecord, []float32, error) {
 	client.mux.Lock()
 	defer client.mux.Unlock()
+
+	if client.isClosed() {
+		return nil, nil, ErrDatabaseClosed
+	}
 
 	result := []DatabaseRecord{}
 	similarities := []float32{}
@@ -103,7 +134,7 @@ func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float
 		}
 	}
 
-	return result, similarities
+	return result, similarities, nil
 }
 
 func (database *JSONDatabase) loadDatabase() {
@@ -141,4 +172,8 @@ func cosineDistance(vecA []float32, vecB []float32) (float32, error) {
 
 	distance := float64(dotProductSum) / (math.Sqrt(float64(magnitudeSumA)) * math.Sqrt(float64(magnitudeSumB)))
 	return float32(distance), nil
+}
+
+func (client *JSONDatabaseClient) isClosed() bool {
+	return !client.database.open
 }

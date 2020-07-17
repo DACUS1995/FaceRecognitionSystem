@@ -22,11 +22,11 @@ import (
 
 // TODO Use a pool for the database connections
 
-var DatabaseClient *dbactions.DatabaseClient = nil
+var databaseClient dbactions.DatabaseClient = nil
 var FaceDetectorClient *facedetector.Client = nil
 
-func StartServer(databaseClient dbactions.DatabaseClient) {
-	DatabaseClient = &databaseClient
+func StartServer(newDatabaseClient dbactions.DatabaseClient) {
+	databaseClient = newDatabaseClient
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", homeHandler)
