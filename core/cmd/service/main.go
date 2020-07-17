@@ -12,23 +12,21 @@ import (
 	sampler "github.com/DACUS1995/FaceRecognition/core/sampler"
 )
 
-var Config *config.ConfigType = nil
-
 var close = make(chan bool)
 var wg = sync.WaitGroup{}
 
 func main() {
-	Config = config.GetConfig()
+	config := config.GetConfig()
 	databaseClient := GetDatabase()
 
 	api.StartServer(databaseClient)
 
-	if Config.TestImagePath != nil {
-		RunLocalImageFaceDetection(*Config.TestImagePath)
+	if config.TestImagePath != nil {
+		RunLocalImageFaceDetection(*config.TestImagePath)
 	}
 
 	go RunPeriodicDetection(
-		*Config.SamplingIntervalMiliseconds,
+		*config.SamplingIntervalMiliseconds,
 		close,
 		databaseClient,
 	)
@@ -50,12 +48,13 @@ func GetDatabase() dbactions.DatabaseClient {
 func RunPeriodicDetection(miliseconds int, close chan bool, databaseClient dbactions.DatabaseClient) {
 	ticker := time.NewTicker(time.Duration(miliseconds) * time.Millisecond)
 
-	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
+	config := config.GetConfig()
+	facedetectorClient, err := facedetector.NewClient(*config.FaceDetectionServiceAddress)
 	if err != nil {
 		log.Panicf("Failed to instantiate client: %v", err)
 	}
 
-	sampler, err := sampler.NewCameraSampler(*Config.CameraSamplerServiceAddress)
+	sampler, err := sampler.NewCameraSampler(*config.CameraSamplerServiceAddress)
 	if err != nil {
 		log.Panic("Failed to create connection to the sampler.")
 	}
@@ -85,7 +84,8 @@ func RunPeriodicDetection(miliseconds int, close chan bool, databaseClient dbact
 }
 
 func RunLocalImageFaceDetection(testImagePath string) {
-	facedetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
+	config := config.GetConfig()
+	facedetectorClient, err := facedetector.NewClient(*config.FaceDetectionServiceAddress)
 	if err != nil {
 		log.Panicf("Failed to instantiate client: %v", err)
 	}
@@ -101,6 +101,6 @@ func RunLocalImageFaceDetection(testImagePath string) {
 		log.Panicf("Error: %v", err)
 	}
 
-	log.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/(*Config.EmbeddingVectorSize))
+	log.Printf("Number of faces detected: %v", len(detectedFacesEmbeddings)/(*config.EmbeddingVectorSize))
 
 }

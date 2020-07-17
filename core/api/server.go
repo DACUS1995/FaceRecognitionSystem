@@ -22,12 +22,10 @@ import (
 
 // TODO Use a pool for the database connections
 
-var Config *config.ConfigType = nil
 var DatabaseClient *dbactions.DatabaseClient = nil
 var FaceDetectorClient *facedetector.Client = nil
 
 func StartServer(databaseClient dbactions.DatabaseClient) {
-	Config = config.GetConfig()
 	DatabaseClient = &databaseClient
 	router := mux.NewRouter()
 
@@ -110,8 +108,10 @@ func computeEmbedding(img []byte, imageShape []int32) ([]string, error) {
 }
 
 func getFaceDetectorClient() *facedetector.Client {
+	config := config.GetConfig()
+
 	if FaceDetectorClient == nil {
-		faceDetectorClient, err := facedetector.NewClient(*Config.FaceDetectionServiceAddress)
+		faceDetectorClient, err := facedetector.NewClient(*config.FaceDetectionServiceAddress)
 		FaceDetectorClient = faceDetectorClient
 
 		if err != nil {
