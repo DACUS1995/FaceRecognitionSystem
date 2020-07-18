@@ -12,8 +12,8 @@ type DatabaseClient interface {
 }
 
 type DatabaseRecord struct {
-	Name      string
-	Embedding []float32
+	Name      string    `json:"name"`
+	Embedding []float32 `json:"embedding"`
 }
 
 var ErrDatabaseClosed = errors.New("Database is closed")

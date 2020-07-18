@@ -20,10 +20,8 @@ import (
 	facedetector "github.com/DACUS1995/FaceRecognition/core/face_detector"
 )
 
-// TODO Use a pool for the database connections
-
 var databaseClient dbactions.DatabaseClient = nil
-var FaceDetectorClient *facedetector.Client = nil
+var _faceDetectorClient *facedetector.Client = nil
 
 func StartServer(newDatabaseClient dbactions.DatabaseClient) {
 	databaseClient = newDatabaseClient
@@ -32,7 +30,7 @@ func StartServer(newDatabaseClient dbactions.DatabaseClient) {
 	router.HandleFunc("/", homeHandler)
 	router.HandleFunc("/embeddings", getAllEmbeddings)
 	router.HandleFunc("/embedding/generate", generateEmbedding).Methods("POST")
-	router.HandleFunc("/embedding", createNewEmbedding).Methods("POST")
+	router.HandleFunc("/embedding", addNewEmbedding).Methods("POST")
 	http.Handle("/", router)
 
 	log.Fatal(http.ListenAndServe(":10000", router))
@@ -61,11 +59,14 @@ func generateEmbedding(w http.ResponseWriter, r *http.Request) {
 
 	detectedFacesEmbeddingsJoined := strings.Join(detectedFacesEmbeddingsText, ",")
 
-	fmt.Fprintf(w, detectedFacesEmbeddingsJoined)
-	fmt.Println("Generated a new embedding")
+	_, err = fmt.Fprintf(w, detectedFacesEmbeddingsJoined)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println("Generated a new embedding")
 }
 
-func createNewEmbedding(w http.ResponseWriter, r *http.Request) {
+func addNewEmbedding(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
 	newRecord := dbactions.DatabaseRecord{}
@@ -77,11 +78,28 @@ func createNewEmbedding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = databaseClient.AddRecord(newRecord.Name, newRecord.Embedding)
+	if err != nil {
+		log.Printf("%+v", errors.WithStack(err))
+		http.Error(w, err.Error(), http.StatusNotAcceptable)
+		return
+	}
+
 	fmt.Println("Added a new embedding")
 }
 
 func getAllEmbeddings(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint Hit: getAllEmbeddings")
+	recordCollection, err := databaseClient.GetAll()
+	if err != nil {
+		log.Printf("%+v", errors.WithStack(err))
+	}
+
+	encodedRecordCollection, err := json.Marshal(recordCollection)
+	if err != nil {
+		log.Printf("%+v", errors.WithStack(err))
+	}
+
+	fmt.Fprintf(w, string(encodedRecordCollection))
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
@@ -110,14 +128,14 @@ func computeEmbedding(img []byte, imageShape []int32) ([]string, error) {
 func getFaceDetectorClient() *facedetector.Client {
 	config := config.GetConfig()
 
-	if FaceDetectorClient == nil {
+	if _faceDetectorClient == nil {
 		faceDetectorClient, err := facedetector.NewClient(*config.FaceDetectionServiceAddress)
-		FaceDetectorClient = faceDetectorClient
+		_faceDetectorClient = faceDetectorClient
 
 		if err != nil {
 			log.Panicf("Failed to instantiate client: %v", err)
 		}
 	}
 
-	return FaceDetectorClient
+	return _faceDetectorClient
 }

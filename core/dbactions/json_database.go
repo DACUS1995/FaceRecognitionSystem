@@ -48,6 +48,7 @@ func (client *JSONDatabaseClient) AddRecord(name string, embedding []float32) er
 		return ErrDatabaseClosed
 	}
 
+	// TODO Store the embeddings indexed by name
 	for _, record := range client.database.recordCollection {
 		if record.Name == name {
 			record.Embedding = embedding

@@ -28,7 +28,7 @@ func (handler *DatabaseSearcher) Handle(boundingBoxes []int32, detectedFacesEmbe
 	Config := config.GetConfig()
 
 	for idx := 0; idx < len(detectedFacesEmbeddings)-*Config.EmbeddingVectorSize; idx += *Config.EmbeddingVectorSize {
-		if records, similarities := handler.databaseClient.SearchRecordBySimilarity(detectedFacesEmbeddings[idx : idx+*Config.EmbeddingVectorSize]); len(records) > 0 {
+		if records, similarities, _ := handler.databaseClient.SearchRecordBySimilarity(detectedFacesEmbeddings[idx : idx+*Config.EmbeddingVectorSize]); len(records) > 0 {
 			for i, record := range records {
 				log.Printf("-> Record[%v] | similarity: %v\n", record.Name, similarities[i])
 			}
