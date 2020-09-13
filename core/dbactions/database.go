@@ -17,3 +17,4 @@ type DatabaseRecord struct {
 }
 
 var ErrDatabaseClosed = errors.New("Database is closed")
+var ErrNoMatchesFound = errors.New("Cannot find any matches for the provided embedding")

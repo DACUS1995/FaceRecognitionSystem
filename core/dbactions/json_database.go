@@ -138,6 +138,10 @@ func (client *JSONDatabaseClient) SearchRecordBySimilarity(faceEmbedding []float
 		}
 	}
 
+	if len(result) == 0 {
+		return nil, nil, ErrNoMatchesFound
+	}
+
 	return result, similarities, nil
 }
 
